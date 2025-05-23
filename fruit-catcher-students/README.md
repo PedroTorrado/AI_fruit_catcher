@@ -1,107 +1,105 @@
-# Fruit Catcher Game
+# Fruit Catcher AI Project
 
-This project was developed for the Artificial Intelligence class during my bachelor's course at ISCTE.
+This project implements a game where players need to catch fruits while avoiding bombs. The game includes both human playable mode and AI-powered classifiers to make decisions.
 
-A Python-based game where players catch falling fruits while avoiding bombs, featuring both human playable mode and AI-controlled gameplay using neural networks and genetic algorithms.
+## Project Structure
 
-## Description
+- `main.py`: Main game runner and dataset loader
+- `dt.py`: Decision Tree implementation for fruit/bomb classification
+- `game.py`: Game mechanics and visualization
+- `nn.py`: Neural Network implementation
+- `genetic.py`: Genetic Algorithm implementation
+- `train.csv`: Training dataset
+- `test.csv`: Test dataset
+- `items.csv`: Game items configuration
 
-Fruit Catcher is an interactive game where a basket moves horizontally at the bottom of the screen to catch falling fruits while avoiding bombs. The game includes:
+## Decision Tree Implementation (dt.py)
 
-- Human playable mode with keyboard controls
-- AI player mode using neural networks
-- Genetic algorithm for training the AI
-- Decision tree-based fruit classification system
-- Score tracking system
+The decision tree classifier is implemented in `dt.py` with the following key components:
 
-## Features
+### Core Functions
 
-- Simple and intuitive gameplay
-- Multiple game modes (Human/AI)
-- Neural network-based AI player
-- Genetic algorithm for AI training
-- Real-time fruit classification
-- Score tracking
-- Graphical interface using Pygame
+1. `train_decision_tree(X, y, feature_names)`
+   - Main entry point for training
+   - Takes feature vectors, labels, and feature names
+   - Returns a trained DecisionTree instance
 
-## Requirements
+2. `build_decision_tree(X, y, feature_names, depth, max_depth)`
+   - Recursive tree building function
+   - Uses information gain to choose best splits
+   - Implements stopping criteria (max depth, pure nodes)
 
-- Python 3.x
-- Pygame
-- NumPy
-- Other dependencies (specified in requirements)
+3. `calculate_entropy(y)`
+   - Calculates Shannon entropy for label distributions
+   - Used for information gain calculations
 
-## Installation
+4. `calculate_feature_entropy(features, feature_idx, labels)`
+   - Computes entropy for specific feature splits
+   - Helps determine the best feature to split on
 
-1. Clone the repository
-2. Install the required dependencies:
-```bash
-pip install pygame numpy
+5. `calculate_information_gain(feature_entropies, dataset_entropy)`
+   - Calculates information gain for all features
+   - Used to select the best splitting feature
+
+6. `print_tree(tree, indent="")`
+   - Visualizes the decision tree structure
+   - Shows feature splits and classifications
+
+### DecisionTree Class
+
+```python
+class DecisionTree:
+    def __init__(self, X, y, threshold=1.0, max_depth=None):
+        # Initialize tree parameters
+        
+    def predict(self, x):
+        # Make predictions on new data
 ```
+
+## Integration with main.py
+
+The main.py file was modified to properly pass feature names to the decision tree:
+
+```python
+def train_fruit_classifier(filename):
+    feature_names, X, y = load_train_dataset(filename)
+    dt = train_decision_tree(X, y, feature_names=feature_names)
+    return lambda item: dt.predict(item)
+```
+
+## Data Format
+
+The training data (`train.csv`) follows this structure:
+- Column 1: ID
+- Columns 2-4: Features (name, color, format)
+- Last Column: Label (1 for fruit, -1 for bomb)
+
+## Decision Tree Features
+
+1. **Automatic Feature Detection**
+   - Features are automatically extracted from CSV headers
+   - No hardcoded feature names required
+
+2. **Information Gain Based Splitting**
+   - Uses entropy calculations to find optimal splits
+   - Maximizes information gain at each node
+
+3. **Tree Visualization**
+   - Includes a pretty-print function for the tree
+   - Shows the complete decision path
+
+4. **Configurable Parameters**
+   - Adjustable maximum depth
+   - Customizable splitting threshold
 
 ## Usage
 
-### Running the Game
-
-To start the game in normal mode:
+To run the game with the decision tree classifier:
 ```bash
 python main.py
 ```
 
-### Training the AI
-
-To train the AI using genetic algorithm:
+To run in headless mode (no graphics):
 ```bash
-python main.py -t
+python main.py --headless
 ```
-
-Additional training parameters:
-- `-p` or `--population`: Set population size (default: 100)
-- `-g` or `--generations`: Set number of generations (default: 100)
-- `-f` or `--file`: Specify file to store/load AI weights
-- `-l` or `--headless`: Run without graphics
-
-Example:
-```bash
-python main.py -t -p 200 -g 150 -f custom_weights.txt
-```
-
-## Game Controls
-
-### Human Mode
-- Left Arrow: Move basket left
-- Right Arrow: Move basket right
-
-### AI Mode
-The AI automatically controls the basket based on trained neural network weights.
-
-## Project Structure
-
-- `main.py`: Main game entry point and AI training logic
-- `game.py`: Core game mechanics and display
-- `genetic.py`: Genetic algorithm implementation
-- `nn.py`: Neural network architecture
-- `dt.py`: Decision tree implementation for fruit classification
-- `items.csv`: Item definitions
-- `train.csv`: Training data for fruit classification
-- `test.csv`: Test data for fruit classification
-- `images/`: Game assets directory
-
-## How it Works
-
-1. **Game Mechanics**:
-   - Fruits and bombs fall from the top of the screen
-   - Player controls a basket at the bottom
-   - Catch fruits to score points
-   - Avoid bombs (game ends if caught)
-
-2. **AI Implementation**:
-   - Neural network processes game state
-   - Genetic algorithm optimizes network weights
-   - State includes basket position and item information
-
-3. **Fruit Classification**:
-   - Decision tree classifies items as fruits or bombs
-   - Training data provided in CSV format
-   - Real-time classification during gameplay
-

@@ -60,9 +60,8 @@ def load_train_dataset(filename):
 
 def train_fruit_classifier(filename):
     f, X, y = load_train_dataset(filename)
-    dt = train_decision_tree(X, y)
-    return lambda item: dt.predict(item) 
-
+    dt = train_decision_tree(X, y, feature_names=f)
+    return lambda item: dt.predict(item)
 
 def main():
     parser = argparse.ArgumentParser(description='IA 2024/2025 - Project 2 - Fruit Catcher')
