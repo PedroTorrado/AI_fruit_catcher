@@ -82,8 +82,8 @@ class NeuralNetwork:
         # Hidden layer with ReLU
         hidden = relu(np.dot(x, self.hidden_weights) + self.hidden_biases)
         
-        # Output layer
-        output = np.dot(hidden, self.output_weights) + self.output_bias
+        # Output layer with sigmoid activation
+        output = sigmoid(np.dot(hidden, self.output_weights) + self.output_bias)
         
         # Simple decision making
         return 1 if output > 0 else -1
