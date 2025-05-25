@@ -102,7 +102,7 @@ def train_decision_tree(X, y, feature_names):
     dt = DecisionTree(X, y)
     dt.feature_names = feature_names  # Store feature names
     dt.tree = build_decision_tree(X, y, feature_names)
-    print_tree(dt.tree)
+    # ? print_tree(dt.tree)
     test_prediction()
     return dt
 
@@ -117,10 +117,10 @@ def find_best_feature(X, y, feature_names):
     Returns:
         str: Name of the feature with highest information gain
     """
-    print("Training data:", X)
-    print("Labels:", y)
+    # ? print("Training data:", X)
+    # ? print("Labels:", y)
     dataset_entropy = calculate_entropy(y)
-    print("Dataset entropy:", dataset_entropy)
+    # ? print("Dataset entropy:", dataset_entropy)
 
     # Get entropy for each feature (column)
     feature_entropies = []
@@ -128,14 +128,14 @@ def find_best_feature(X, y, feature_names):
         feature_column = [row[feature_idx] for row in X]  # Extract the feature column
         entropy = calculate_feature_entropy(feature_column, feature_idx, y)
         feature_entropies.append(entropy)
-        print(f"Feature {feature_names[feature_idx]} entropy:", entropy)
+        # ? print(f"Feature {feature_names[feature_idx]} entropy:", entropy)
 
     information_gains = calculate_information_gain(feature_entropies, dataset_entropy)
-    print("Information gains by feature:", {name: gain for name, gain in zip(feature_names, information_gains)})
+    # ? print("Information gains by feature:", {name: gain for name, gain in zip(feature_names, information_gains)})
 
     best_feature_idx = np.argmax(information_gains)
     best_feature_name = feature_names[best_feature_idx]
-    print(f"Best feature: {best_feature_name}")
+    # ? print(f"Best feature: {best_feature_name}")
 
     return best_feature_name
 
@@ -278,19 +278,22 @@ def build_decision_tree(X, y, feature_names, depth=0, max_depth=5):
         # Recursively build subtree
         tree[best_feature_name][value] = build_decision_tree(sub_X, sub_y, remaining_features, depth + 1, max_depth)
 
-        # Example of populated tree structure:
-        # tree = {
-        #     'color': {
-        #         'red': {
-        #             'format': {
-        #                 'circle': 1,
-        #                 'curved': -1
-        #             }
-        #         },
-        #         'blue': -1,
-        #         'yellow': 1
-        #     }
-        # }
+        """
+        Example of populated tree structure:
+
+        tree = {
+            'color': {
+                'red': {
+                    'format': {
+                        'circle': 1,
+                        'curved': -1
+                    }
+                },
+                'blue': -1,
+                'yellow': 1
+            }
+        }
+        """
     
     return tree
 
@@ -346,7 +349,7 @@ def test_prediction():
     dt.tree = build_decision_tree(train_X, train_y, feature_names)
     
     # Test predictions on items data
-    print("\nPredictions for items:")
-    for x, true_y in zip(X, y):
-        prediction = dt.predict(x)
-        print(f"Item: {x}, Predicted: {'Fruit' if prediction == 1 else 'Bomb'}, Actual: {'Fruit' if true_y == 1 else 'Bomb'}")
+    # ? print("\nPredictions for items:")
+    # ? for x, true_y in zip(X, y):
+    # ?     prediction = dt.predict(x)
+    # ?     print(f"Item: {x}, Predicted: {'Fruit' if prediction == 1 else 'Bomb'}, Actual: {'Fruit' if true_y == 1 else 'Bomb'}")

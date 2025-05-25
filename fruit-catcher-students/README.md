@@ -56,6 +56,59 @@ class DecisionTree:
         # Make predictions on new data
 ```
 
+## Neural Network Implementation (nn.py)
+
+The neural network controller is implemented in `nn.py` and is responsible for controlling the basket's movement in the game.
+
+### Core Components
+
+1. `NeuralNetwork` Class
+   - Implements a feedforward neural network
+   - Takes game state as input (basket position + falling items)
+   - Outputs movement decisions (-1 for left, 1 for right)
+   - Configurable architecture with multiple hidden layers
+
+2. `create_network_architecture(input_size)`
+   - Creates a network with predefined architecture:
+     - 2 hidden layers (8 and 4 neurons)
+     - Sigmoid activation for hidden layers
+     - Step function for output layer
+
+### Network Architecture
+
+The neural network processes:
+- Input Layer (10 neurons):
+  - Basket position (1 value)
+  - Up to 3 falling items (3 values each):
+    - x coordinate
+    - y coordinate
+    - is_fruit prediction (-1 or 1)
+- Hidden Layers:
+  - First hidden layer: 8 neurons
+  - Second hidden layer: 4 neurons
+- Output Layer:
+  - Single neuron
+  - Step function activation (-1 or 1)
+
+### Training
+
+The network is trained using a genetic algorithm that:
+1. Generates a population of random weights
+2. Evaluates each network by playing the game
+3. Selects best performers for next generation
+4. Applies crossover and mutation
+5. Repeats until target score is reached
+
+### Usage
+
+```python
+# Create and train the network
+python main.py -t -p 100 -g 100  # Train with population 100, generations 100
+
+# Play the game with trained network
+python main.py  # Shows game interface with AI option
+```
+
 ## Integration with main.py
 
 The main.py file was modified to properly pass feature names to the decision tree:
