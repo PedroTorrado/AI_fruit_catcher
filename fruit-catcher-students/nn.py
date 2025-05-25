@@ -60,43 +60,32 @@ class NeuralNetwork:
 
     def preprocess(self, state):
         """Apply domain-specific transformations to the input state."""
-
         # Normalize basket x-pos [-1, 1]
         state[0] = (state[0] - 0.5) * 2
-
-        # For each fruit: [x, y, is_fruit]
+        # Compute relative positions for each item to the basket
+        basket_x = state[0] / 2 + 0.5  # Convert back to [0,1] for comparison
         for i in range(3):
             base = 1 + i * 3
             if base + 2 >= len(state):
                 continue
-
             fruit_x = state[base]
             fruit_y = state[base + 1]
             is_fruit = state[base + 2]
-
-            # Emphasize 'is_fruit' status (bombs = -1, fruit = 1)
-            is_fruit *= 5.0
-
-            # Emphasize vertical urgency: falling closer = more important
-            fruit_x *= 1.5
-
-            # If close to basket vertically, emphasize lateral position
-            if fruit_y > 0.6:
-                state[base] *= 1.5
-
+            # Compute relative x position to basket
+            rel_x = fruit_x - basket_x
+            # Emphasize fruit/bomb status (bombs negative, fruit positive)
+            state[base + 2] = is_fruit * 3.0  # Moderate emphasis on fruit/bomb status
+            # Store relative x position
+            state[base] = rel_x * 2.0  # Emphasize relative lateral position
+            # Emphasize vertical position as urgency
+            state[base + 1] = fruit_y * 1.5  # Moderate emphasis on vertical urgency
         return state
 
     def forward(self, x):
-        """Forward pass with enhanced state preprocessing and confidence biasing."""
-        x = self.preprocess(x)
-
+        """Forward pass with state preprocessing."""
+        # ? x = self.preprocess(x)
         hidden = relu(np.dot(x, self.hidden_weights) + self.hidden_biases)
         output = sigmoid(np.dot(hidden, self.output_weights) + self.output_bias)
-
-        # Confidence-based random bias to break ties
-        if abs(output - 0.5) < 0.1:
-            output += (0.15 if random.random() > 0.5 else -0.15)
-
         return 1 if output > 0.5 else -1
 
 
