@@ -59,51 +59,30 @@ class NeuralNetwork:
         self.output_bias = weights[idx]
 
     def preprocess(self, state):
-        """
-        Preprocess the game state to help the neural network make better decisions.
-        
-        The state contains:
-        - state[0]: Basket x-position (normalized to [-1,1])
-        - For each item (up to 3 items):
-            - X position 
-            - Y position
-            - Type (1 for fruit, -1 for bomb)
-        """
-        # Normalize basket position from [0,1] to [-1,1] range
-        basket_pos = (state[0] - 0.5) * 2
-        state[0] = basket_pos
-        
-        # Get original basket x-pos in [0,1] range for distance calculations
-        basket_x = (basket_pos + 1) / 2
-        
-        # Process each item (fruit/bomb)
+        """Apply domain-specific transformations to the input state."""
+        # Normalize basket x-pos [-1, 1]
+        state[0] = (state[0] - 0.5) * 2
+        # Compute relative positions for each item to the basket
+        basket_x = state[0] / 2 + 0.5  # Convert back to [0,1] for comparison
         for i in range(3):
-            # Get start index for this item's data
-            idx = 1 + i * 3
-            
-            # Skip if beyond state bounds
-            if idx + 2 >= len(state):
+            base = 1 + i * 3
+            if base + 2 >= len(state):
                 continue
-                
-            # Get item properties
-            item_x = state[idx]
-            item_y = state[idx + 1] 
-            is_fruit = state[idx + 2]
-            
-            # Calculate horizontal distance to basket
-            distance_to_basket = item_x - basket_x
-            
-            # Update state values:
-            # 1. Horizontal distance (weighted more for closer items)
-            closeness_weight = 1.0 + (1.0 - item_y)  # Items closer to ground weighted more
-            state[idx] = distance_to_basket * 2.0 * closeness_weight
-            
-            # 2. Vertical position (higher value = more urgent)
-            state[idx + 1] = item_y * 3.0
-            
-            # 3. Item type (amplify fruit/bomb difference)
-            state[idx + 2] = is_fruit * 3.0
-            
+            fruit_x = state[base]
+            fruit_y = state[base + 1]
+            is_fruit = state[base + 2]
+            # Compute relative x position to basket
+            rel_x = fruit_x - basket_x
+            # Emphasize fruit/bomb status (bombs negative, fruit positive)
+            state[base + 2] = is_fruit * 3.0  # Moderate emphasis on fruit/bomb status
+            # Store relative x position with stronger bias for bombs
+            if is_fruit < 0:  # If it's a bomb
+                # Amplify the relative position to make the basket move away more strongly
+                state[base] = rel_x * 4.0  # Strong emphasis on bomb avoidance
+            else:
+                state[base] = rel_x * 2.0  # Normal emphasis for fruits
+            # Emphasize vertical position as urgency
+            state[base + 1] = fruit_y * 1.5  # Moderate emphasis on vertical urgency
         return state
 
     def forward(self, x):
