@@ -324,7 +324,7 @@ def test_prediction():
     # Load items data
     X = []
     y = []
-    with open('items.csv') as f:
+    with open('test.csv') as f:
         reader = csv.reader(f, delimiter=';')
         headers = next(reader)  # Skip header row
         feature_names = headers[1:-1]  # Get feature names excluding id and is_fruit

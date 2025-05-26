@@ -6,71 +6,6 @@ def create_individual(individual_size):
     """Create a single individual with random weights."""
     return [random.uniform(-1, 1) for _ in range(individual_size)]
 
-def generate_population_from_file(individual_size, population_size, split_size=0.5, filename='best_individual.txt'):
-    """Generate population with variations of best known solution and random individuals.
-    
-    Args:
-        individual_size: Size of each individual (number of weights)
-        population_size: Total size of population to generate
-        split_size: Proportion of population to derive from best solution (0.0 to 1.0)
-        filename: File containing the best known solution
-    """
-    try:
-        # Read best individual from file
-        with open(filename, 'r') as f:
-            best_weights = list(map(float, f.read().split(',')))
-        
-        if len(best_weights) != individual_size:
-            print(f"Warning: Best individual size ({len(best_weights)}) doesn't match expected size ({individual_size})")
-            return generate_population(individual_size, population_size)
-        
-        # Calculate sizes
-        derived_size = int(population_size * split_size)
-        population = []
-        
-        # Add the original best individual
-        population.append(best_weights)
-        
-        # Identify critical weights (related to fruit/bomb status and relative positions)
-        critical_indices = set()
-        input_size = 10  # Known input size from game state
-        for i in [3, 6, 9]:  # Fruit/bomb status indices
-            start_idx = i * input_size
-            end_idx = start_idx + input_size
-            critical_indices.update(range(start_idx, end_idx))
-        
-        # Generate variations of best solution
-        for _ in range(derived_size - 1):
-            variation = best_weights.copy()
-            
-            # Make smaller changes to critical weights
-            for i in range(len(variation)):
-                if i in critical_indices:
-                    if random.random() < 0.1:  # 10% chance to modify critical weights
-                        variation[i] += random.gauss(0, 0.05)  # Very small changes
-                else:
-                    if random.random() < 0.2:  # 20% chance to modify other weights
-                        variation[i] += random.gauss(0, 0.1)  # Small changes
-                
-                # Ensure weights stay in valid range
-                variation[i] = max(-1, min(1, variation[i]))
-            
-            population.append(variation)
-        
-        # Add random individuals for the remaining portion
-        random_size = population_size - derived_size
-        if random_size > 0:
-            population.extend([create_individual(individual_size) for _ in range(random_size)])
-        
-        return population
-        
-    except FileNotFoundError:
-        print(f"Warning: {filename} not found, generating completely random population")
-        return generate_population(individual_size, population_size)
-    except Exception as e:
-        print(f"Error reading {filename}: {e}")
-        return generate_population(individual_size, population_size)
-
 def generate_population(individual_size, population_size):
     """Generate initial population."""
     return [create_individual(individual_size) for _ in range(population_size)]
@@ -127,23 +62,7 @@ def mutate(individual, mutation_rate, generation=None, max_generations=None):
 def genetic_algorithm(individual_size, population_size, fitness_function, target_fitness,
                       generations, elite_rate=0.05, mutation_rate=0.25, num_seeds=12):
     """Genetic algorithm with adaptive mutation, elitism, and tournament selection."""
-    # Ask user for population generation method
-    while True:
-        print("\nChoose population generation method:")
-        print("1. Random population")
-        print("2. Mixed population (half from best_individual.txt, half random)")
-        choice = input("Enter your choice (1 or 2): ").strip()
-        
-        if choice == "1":
-            population = generate_population(individual_size, population_size)
-            print("Using random population generation.")
-            break
-        elif choice == "2":
-            population = generate_population_from_file(individual_size, population_size)
-            print("Using mixed population generation.")
-            break
-        else:
-            print("Invalid choice. Please enter 1 or 2.")
+    population = generate_population(individual_size, population_size)
     
     best_individual = None
     best_fitness = float('-inf')
@@ -161,11 +80,11 @@ def genetic_algorithm(individual_size, population_size, fitness_function, target
                     fitness = fitness_function(individual, seed=seed)
                     individual_scores.append(fitness)
                 avg_fitness_score = sum(individual_scores) / num_seeds
-                # ? # Apply movement penalty based on score variance
-                # ? score_variance = np.var(individual_scores)
-                # ? movement_penalty = -2.0 if score_variance < 1.0 else 0.0
-                # ? adjusted_score = avg_fitness_score + movement_penalty
-                # ? fitness = max(0, adjusted_score)
+                # ! ? Apply movement penalty based on score variance
+                score_variance = np.var(individual_scores)
+                movement_penalty = -2.0 if score_variance < 1.0 else 0.0
+                adjusted_score = avg_fitness_score + movement_penalty
+                fitness = max(0, adjusted_score)
                 fitness_scores.append(fitness)
 
                 if fitness > best_fitness:
