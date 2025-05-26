@@ -123,7 +123,7 @@ def mutate(individual, mutation_rate, generation=None, max_generations=None):
 #     return population
 
 def genetic_algorithm(individual_size, population_size, fitness_function, target_fitness,
-                      generations, elite_rate=0.05, mutation_rate=0.25, num_seeds=6):
+                      generations, elite_rate=0.05, mutation_rate=0.25, num_seeds=12):
     """Genetic algorithm with adaptive mutation, elitism, and tournament selection."""
     population = generate_population(individual_size, population_size)
     
@@ -132,12 +132,12 @@ def genetic_algorithm(individual_size, population_size, fitness_function, target
     elite_size = max(1, int(population_size * elite_rate))
     fitness_history = []
     
-    # Parameters for stagnation detection
-    STAGNATION_WINDOW = 15  # Increased window size
-    MIN_IMPROVEMENT = 0.02  # Reduced improvement threshold
-    last_improvement_gen = 0
-    best_fitness_history = []
-    stagnation_count = 0
+    # # Parameters for stagnation detection
+    # STAGNATION_WINDOW = 15  # Increased window size
+    # MIN_IMPROVEMENT = 0.02  # Reduced improvement threshold
+    # last_improvement_gen = 0
+    # best_fitness_history = []
+    # stagnation_count = 0
     
     for generation in range(generations):
         # Evaluate population
@@ -175,7 +175,7 @@ def genetic_algorithm(individual_size, population_size, fitness_function, target
         avg_fitness = np.mean([f for f in fitness_scores if f != float('-inf')])
         std_fitness = np.std([f for f in fitness_scores if f != float('-inf')])
         fitness_history.append((best_fitness, avg_fitness, std_fitness))
-        best_fitness_history.append(best_fitness)
+        # best_fitness_history.append(best_fitness)
         
         print(f"Generation {generation + 1}: Best = {best_fitness:.2f}, Avg = {avg_fitness:.2f}, Std = {std_fitness:.2f}")
 
