@@ -2,6 +2,16 @@
 
 This project implements a game where players need to catch fruits while avoiding bombs. The game includes both human playable mode and AI-powered classifiers to make decisions.
 
+```
+    🍎  🍌  🍇
+      \  |  /
+       \ | /
+        \|/
+    ┌──────────┐
+    │   🧺     │
+    └──────────┘
+```
+
 ## Project Structure
 
 - `main.py`: Main game runner and dataset loader
@@ -12,6 +22,7 @@ This project implements a game where players need to catch fruits while avoiding
 - `train.csv`: Training dataset
 - `test.csv`: Test dataset
 - `items.csv`: Game items configuration
+- `weights_logger.py`: Weight logging and analysis system
 
 ## Decision Tree Implementation (dt.py)
 
@@ -58,55 +69,165 @@ class DecisionTree:
 
 ## Neural Network Implementation (nn.py)
 
-The neural network controller is implemented in `nn.py` and is responsible for controlling the basket's movement in the game.
-
-### Core Components
-
-1. `NeuralNetwork` Class
-   - Implements a feedforward neural network
-   - Takes game state as input (basket position + falling items)
-   - Outputs movement decisions (-1 for left, 1 for right)
-   - Configurable architecture with multiple hidden layers
-
-2. `create_network_architecture(input_size)`
-   - Creates a network with predefined architecture:
-     - 2 hidden layers (8 and 4 neurons)
-     - Sigmoid activation for hidden layers
-     - Step function for output layer
+The neural network controller implements a feedforward neural network for game control decisions.
 
 ### Network Architecture
 
-The neural network processes:
-- Input Layer (10 neurons):
-  - Basket position (1 value)
-  - Up to 3 falling items (3 values each):
-    - x coordinate
-    - y coordinate
-    - is_fruit prediction (-1 or 1)
-- Hidden Layers:
-  - First hidden layer: 8 neurons
-  - Second hidden layer: 4 neurons
-- Output Layer:
-  - Single neuron
-  - Step function activation (-1 or 1)
+```
+Input Layer (10)     Hidden Layer 1 (8)    Output Layer (1)
+    [x]                 [x]                     [x]
+    [x]                 [x]  
+    [x]                 [x]  
+    [x]                 [x]   
+    [x]                 [x]
+    [x]                 [x]
+    [x]                 [x]
+    [x]                 [x]
+    [x]
+    [x]
+```
 
-### Training
+### Input Processing
+- Basket position (1 value)
+- Up to 3 falling items (3 values each):
+  - x coordinate
+  - y coordinate
+  - is_fruit prediction (-1 or 1)
 
-The network is trained using a genetic algorithm that:
-1. Generates a population of random weights
-2. Evaluates each network by playing the game
-3. Selects best performers for next generation
-4. Applies crossover and mutation
-5. Repeats until target score is reached
+### Layer Details
+1. **Input Layer (10 neurons)**
+   - Raw game state data
+   - Normalized to [-1, 1] range
 
-### Usage
+2. **Hidden Layer 1 (8 neurons)**
+   - Sigmoid activation
+   - Learns complex patterns in item trajectories
 
+3. **Hidden Layer 2 (4 neurons)**
+   - Sigmoid activation
+   - Refines decision making
+
+4. **Output Layer (1 neuron)**
+   - Step function activation
+   - Outputs: -1 (move left) or 1 (move right)
+
+## Genetic Algorithm Implementation (genetic.py)
+
+The genetic algorithm optimizes the neural network weights through evolutionary processes.
+
+### Algorithm Flow
+```
+Initial Population
+      ↓
+Fitness Evaluation
+      ↓
+Selection
+      ↓
+Crossover
+      ↓
+Mutation
+      ↓
+New Generation
+```
+
+### Key Components
+
+1. **Population Initialization**
+   - Random weight generation
+   - Population size configurable
+   - Weights normalized to [-1, 1]
+
+2. **Fitness Evaluation**
+   - Game simulation for each individual
+   - Multiple seeds for robust evaluation
+   - Score based on:
+     - Fruits caught
+     - Bombs avoided
+     - Survival time
+
+3. **Selection**
+   - Tournament selection
+   - Elitism (best individuals preserved)
+   - Configurable selection pressure
+
+4. **Crossover**
+   - Single-point crossover
+   - Weight matrix recombination
+   - Probability: 0.7 (default)
+
+5. **Mutation**
+   - Gaussian noise addition
+   - Probability: 0.1 (default)
+   - Mutation rate decay
+
+## Weight Logger System
+
+The weight logging system (`weights_logger.py`) provides comprehensive tracking and analysis of neural network weights during training.
+
+### Features
+
+1. **Weight Tracking**
+   - Logs weights for each generation
+   - Tracks fitness scores
+   - Records training parameters
+
+2. **Analysis Tools**
+   - Weight distribution visualization
+   - Fitness score trends
+   - Performance correlation analysis
+
+3. **Best Weight Identification**
+   - Multiple evaluation metrics
+   - Cross-validation across different seeds
+   - Parameter sensitivity analysis
+
+### Usage Example
 ```python
-# Create and train the network
-python main.py -t -p 100 -g 100  # Train with population 100, generations 100
+# Initialize logger
+logger = WeightLogger("training_session_1")
 
-# Play the game with trained network
-python main.py  # Shows game interface with AI option
+# Log weights during training
+logger.log_weights(generation, weights, fitness_score)
+
+# Analyze results
+best_weights = logger.get_best_weights(
+    metric="average_score",
+    num_seeds=5,
+    game_params={"speed": 1.2, "spawn_rate": 0.8}
+)
+```
+
+### Parameter Sensitivity
+The weight logger helps identify how different parameters affect performance:
+- Game speed
+- Spawn rates
+- Number of evaluation seeds
+- Genetic algorithm parameters
+
+## Usage
+
+### Training Mode
+```bash
+# Basic training
+python main.py -t
+
+# Advanced training with parameters
+python main.py -t -p 100 -g 100 --mutation-rate 0.1 --crossover-rate 0.7
+
+# Training with weight logging
+python main.py -t --log-weights training_session_1
+```
+
+### Play Mode
+```bash
+# Human play
+python main.py
+
+# AI play with specific weights
+python main.py --weights best_weights.json
+
+# Headless mode (no graphics)
+python main.py --headless
 ```
 
 ## Integration with main.py
@@ -145,14 +266,13 @@ The training data (`train.csv`) follows this structure:
    - Adjustable maximum depth
    - Customizable splitting threshold
 
-## Usage
+## Contributing
 
-To run the game with the decision tree classifier:
-```bash
-python main.py
-```
+Feel free to contribute to this project by:
+1. Forking the repository
+2. Creating a feature branch
+3. Submitting a pull request
 
-To run in headless mode (no graphics):
-```bash
-python main.py --headless
-```
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
