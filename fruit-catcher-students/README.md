@@ -74,11 +74,11 @@ The neural network controller implements a feedforward neural network for game c
 ### Network Architecture
 
 ```
-Input Layer (10)     Hidden Layer 1 (8)     Hidden Layer 2 (4)     Output Layer (1)
-    [x]                 [x]                    [x]                    [x]
-    [x]                 [x]                    [x]
-    [x]                 [x]                    [x]
-    [x]                 [x]                    [x]
+Input Layer (10)     Hidden Layer 1 (8)    Output Layer (1)
+    [x]                 [x]                     [x]
+    [x]                 [x]  
+    [x]                 [x]  
+    [x]                 [x]   
     [x]                 [x]
     [x]                 [x]
     [x]                 [x]
