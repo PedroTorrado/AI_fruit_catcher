@@ -67,21 +67,13 @@ class DecisionTree:
         # Make predictions on new data
 ```
 
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> 0f7cd12c9d88fce1ef38306f7040fc9fad9c1639
 ## Neural Network Implementation (nn.py)
 
 The neural network controller implements a feedforward neural network for game control decisions.
 
 ### Network Architecture
 
-<<<<<<< HEAD
 ```
-=======
->>>>>>> 0f7cd12c9d88fce1ef38306f7040fc9fad9c1639
 Input Layer (10)     Hidden Layer 1 (8)    Output Layer (1)
     [x]                 [x]                     [x]
     [x]                 [x]  
@@ -306,10 +298,6 @@ python main.py -w best_individual.txt
 python main.py -l
 ```
 
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
->>>>>>> 0f7cd12c9d88fce1ef38306f7040fc9fad9c1639
 ## Integration with main.py
 
 The main.py file was modified to properly pass feature names to the decision tree:
