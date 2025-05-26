@@ -2,6 +2,16 @@
 
 This project implements a game where players need to catch fruits while avoiding bombs. The game includes both human playable mode and AI-powered classifiers to make decisions.
 
+```
+    🍎  🍌  🍇
+      \  |  /
+       \ | /
+        \|/
+    ┌──────────┐
+    │   🧺     │
+    └──────────┘
+```
+
 ## Project Structure
 
 - `main.py`: Main game runner and dataset loader
@@ -12,6 +22,7 @@ This project implements a game where players need to catch fruits while avoiding
 - `train.csv`: Training dataset
 - `test.csv`: Test dataset
 - `items.csv`: Game items configuration
+- `weights_logger.py`: Weight logging and analysis system
 
 ## Decision Tree Implementation (dt.py)
 
@@ -56,15 +67,21 @@ class DecisionTree:
         # Make predictions on new data
 ```
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> 0f7cd12c9d88fce1ef38306f7040fc9fad9c1639
 ## Neural Network Implementation (nn.py)
 
 The neural network controller implements a feedforward neural network for game control decisions.
 
 ### Network Architecture
 
+<<<<<<< HEAD
 ```
+=======
+>>>>>>> 0f7cd12c9d88fce1ef38306f7040fc9fad9c1639
 Input Layer (10)     Hidden Layer 1 (8)    Output Layer (1)
     [x]                 [x]                     [x]
     [x]                 [x]  
@@ -289,7 +306,10 @@ python main.py -w best_individual.txt
 python main.py -l
 ```
 
+<<<<<<< HEAD
 >>>>>>> Stashed changes
+=======
+>>>>>>> 0f7cd12c9d88fce1ef38306f7040fc9fad9c1639
 ## Integration with main.py
 
 The main.py file was modified to properly pass feature names to the decision tree:
@@ -326,14 +346,13 @@ The training data (`train.csv`) follows this structure:
    - Adjustable maximum depth
    - Customizable splitting threshold
 
-## Usage
+## Contributing
 
-To run the game with the decision tree classifier:
-```bash
-python main.py
-```
+Feel free to contribute to this project by:
+1. Forking the repository
+2. Creating a feature branch
+3. Submitting a pull request
 
-To run in headless mode (no graphics):
-```bash
-python main.py --headless
-```
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
