@@ -60,7 +60,7 @@ def mutate(individual, mutation_rate, generation=None, max_generations=None):
     return individual
 
 def genetic_algorithm(individual_size, population_size, fitness_function, target_fitness,
-                      generations, elite_rate=0.05, mutation_rate=0.25, num_seeds=12):
+                      generations, elite_rate=0.05, mutation_rate=0.25, num_seeds=6):
     """Genetic algorithm with adaptive mutation, elitism, and tournament selection."""
     population = generate_population(individual_size, population_size)
     
