@@ -10,59 +10,6 @@ def generate_population(individual_size, population_size):
     """Generate initial population."""
     return [create_individual(individual_size) for _ in range(population_size)]
 
-def evaluate_population(population, network, num_seeds=12):
-    """Evaluate each individual with multiple seeds for robust performance."""
-    scores = []
-    for individual in population:
-        network.load_weights(individual)
-        individual_scores = []
-        for seed in range(num_seeds):
-            try:
-                score = get_score(network.forward, seed=seed)  # Ensures seed consistency
-                individual_scores.append(score)
-            except Exception as e:
-                print(f"Seed {seed} failed: {e}")
-                individual_scores.append(0)
-        avg_score = sum(individual_scores) / num_seeds
-        # Apply a penalty for low variance in scores (indicating lack of movement or strategy)
-        score_variance = np.var(individual_scores)
-        movement_penalty = -2.0 if score_variance < 1.0 else 0.0  # Penalize if scores are too consistent (likely not moving)
-        adjusted_score = avg_score + movement_penalty
-        scores.append(max(0, adjusted_score))  # Ensure score doesn't go negative
-    return scores
-
-def evaluate_baseline(network, num_seeds=12):
-    """Evaluate a baseline random strategy for comparison."""
-    # Create a random individual as baseline
-    baseline_individual = create_individual(network.compute_num_weights())
-    network.load_weights(baseline_individual)
-    baseline_scores = []
-    for seed in range(num_seeds):
-        try:
-            score = get_score(network.forward, seed=seed)
-            baseline_scores.append(score)
-        except Exception as e:
-            print(f"Baseline seed {seed} failed: {e}")
-            baseline_scores.append(0)
-    avg_baseline = sum(baseline_scores) / num_seeds
-    print(f"Baseline Random Strategy Score: {avg_baseline:.2f}")
-    return avg_baseline
-
-def validate_individual(individual, network, num_validation_seeds=3, start_seed=100):
-    """Validate an individual on a set of unseen seeds."""
-    network.load_weights(individual)
-    validation_scores = []
-    for seed in range(start_seed, start_seed + num_validation_seeds):
-        try:
-            score = get_score(network.forward, seed=seed)
-            validation_scores.append(score)
-        except Exception as e:
-            print(f"Validation seed {seed} failed: {e}")
-            validation_scores.append(0)
-    avg_validation_score = sum(validation_scores) / num_validation_seeds
-    print(f"Validation Score on Unseen Seeds: {avg_validation_score:.2f}")
-    return avg_validation_score
-
 def select_parents(population, scores, elite_size):
     """Select parents using elitism and tournament selection."""
     sorted_pairs = sorted(zip(population, scores), key=lambda x: x[1], reverse=True)
@@ -75,12 +22,9 @@ def select_parents(population, scores, elite_size):
         tournament_indices = random.sample(range(len(sorted_population)), 8)
         best_idx = max(tournament_indices, key=lambda i: sorted_scores[i])
         winner = sorted_population[best_idx]
-        
-        # tried avoiding repeated winners but that led to really long runs
         parents.append(winner)
 
     return parents
-
 
 def crossover(parent1, parent2):
     """Simple one-point crossover."""
@@ -116,17 +60,13 @@ def mutate(individual, mutation_rate, generation=None, max_generations=None):
     return individual
 
 def genetic_algorithm(individual_size, population_size, fitness_function, target_fitness,
-                      generations, elite_rate=0.05, mutation_rate=0.25, num_seeds=12):
+                      generations, elite_rate=0.05, mutation_rate=0.25, num_seeds=6):
     """Genetic algorithm with adaptive mutation, elitism, and tournament selection."""
     population = generate_population(individual_size, population_size)
+    
     best_individual = None
     best_fitness = float('-inf')
     elite_size = max(1, int(population_size * elite_rate))
-    
-    # Since we can't access network directly, skip baseline and validation for now or handle via fitness function
-    baseline_score = 0  # Placeholder, as we can't access network directly
-    print("Baseline evaluation skipped due to interface constraints.")
-    
     fitness_history = []
     
     for generation in range(generations):
@@ -140,7 +80,7 @@ def genetic_algorithm(individual_size, population_size, fitness_function, target
                     fitness = fitness_function(individual, seed=seed)
                     individual_scores.append(fitness)
                 avg_fitness_score = sum(individual_scores) / num_seeds
-                # Apply movement penalty based on score variance
+                # ! ? Apply movement penalty based on score variance
                 score_variance = np.var(individual_scores)
                 movement_penalty = -2.0 if score_variance < 1.0 else 0.0
                 adjusted_score = avg_fitness_score + movement_penalty
