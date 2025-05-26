@@ -64,81 +64,63 @@ def crossover(parent1, parent2):
     return parent1[:point] + parent2[point:]
 
 def mutate(individual, mutation_rate, generation=None, max_generations=None):
-    """Apply Gaussian mutation with optional decay, preserving critical game input weights.
+    """Apply simple random mutation to an individual's weights.
     
     Args:
         individual (list): Individual to mutate
         mutation_rate (float): Base mutation rate
-        generation (int, optional): Current generation number for decay calculation
-        max_generations (int, optional): Maximum number of generations for decay calculation
+        generation (int, optional): Not used
+        max_generations (int, optional): Not used
         
     Returns:
         list: Mutated individual
     """
-    decay = 1.0
-    if generation is not None and max_generations:
-        decay = max(0.1, 1 - (generation / max_generations))  # Linear decay
-
-    if random.random() < 0.3:
-        mutation_rate *= 3  # Occasional strong mutation
-
-    # Critical inputs (indices related to fruit/bomb status and relative positions)
-    # Assuming first layer weights for inputs 3,6,9 (fruit/bomb) are critical
-    critical_indices = set()
-    input_size = 10  # Known input size from game state
-    for i in [3, 6, 9]:  # Fruit/bomb status indices
-        start_idx = i * input_size
-        end_idx = start_idx + input_size
-        critical_indices.update(range(start_idx, end_idx))
-
     for i in range(len(individual)):
         if random.random() < mutation_rate:
-            # Reduce mutation strength for critical weights
-            mutation_strength = 0.5 * decay
-            if i in critical_indices:
-                mutation_strength *= 0.5  # Half the mutation strength for critical weights
-            individual[i] += random.gauss(0, mutation_strength)
+            # Random adjustment between -0.5 and 0.5
+            adjustment = random.uniform(-0.5, 0.5)
+            individual[i] += adjustment
             individual[i] = max(-1, min(1, individual[i]))  # Clamp to [-1, 1]
     return individual
 
-def inject_new_individuals(population, fitness_scores, individual_size, population_size, stagnation_count):
-    """Inject new individuals into the population based on stagnation count.
+# def inject_new_individuals(population, fitness_scores, individual_size, population_size, stagnation_count):
+#     """Inject new individuals into the population based on stagnation count.
     
-    Args:
-        population: Current population of individuals
-        fitness_scores: List of fitness scores for each individual
-        individual_size: Size of each individual
-        population_size: Total size of the population
-        stagnation_count: Number of consecutive stagnation periods
+#     Args:
+#         population: Current population of individuals
+#         fitness_scores: List of fitness scores for each individual
+#         individual_size: Size of each individual
+#         population_size: Total size of the population
+#         stagnation_count: Number of consecutive stagnation periods
         
-    Returns:
-        Updated population with new individuals
-    """
-    # Progressive injection rates based on stagnation count
-    if stagnation_count <= 2:
-        injection_rate = 0.2  # Start with 20%
-    elif stagnation_count <= 4:
-        injection_rate = 0.4  # Increase to 40%
-    else:
-        injection_rate = 0.6  # Maximum 60% for persistent stagnation
+#     Returns:
+#         Updated population with new individuals
+#     """
+#     # Progressive injection rates based on stagnation count
+#     if stagnation_count <= 2:
+#         injection_rate = 0.2  # Start with 20%
+#     elif stagnation_count <= 4:
+#         injection_rate = 0.4  # Increase to 40%
+#     else:
+#         injection_rate = 0.6  # Maximum 60% for persistent stagnation
     
-    num_new_individuals = max(2, int(population_size * injection_rate))
-    print(f"Stagnation detected! ({stagnation_count} consecutive periods). "
-          f"Injecting {num_new_individuals} new individuals ({injection_rate*100:.0f}% of population).")
+#     num_new_individuals = max(2, int(population_size * injection_rate))
+#     print(f"Stagnation detected! ({stagnation_count} consecutive periods). "
+#           f"Injecting {num_new_individuals} new individuals ({injection_rate*100:.0f}% of population).")
     
-    # Keep best individuals and add new ones
-    sorted_indices = np.argsort(fitness_scores)
-    keep_size = len(population) - num_new_individuals
-    population = [population[i] for i in sorted_indices[-keep_size:]]
+#     # Keep best individuals and add new ones
+#     sorted_indices = np.argsort(fitness_scores)
+#     keep_size = len(population) - num_new_individuals
+#     population = [population[i] for i in sorted_indices[-keep_size:]]
     
-    # Add new random individuals with higher mutation rate
-    new_individuals = generate_population(individual_size, num_new_individuals)
-    # Apply initial mutation to new individuals
-    new_individuals = [mutate(ind, mutation_rate * 2, generation, generations) 
-                      for ind in new_individuals]
-    population.extend(new_individuals)
+#     # Add new random individuals with higher mutation rate
+#     new_individuals = generate_population(individual_size, num_new_individuals)
+#     # Apply initial mutation to new individuals
+#     new_individuals = [mutate(ind, mutation_rate * 2, generation, generations) 
+#                       for ind in new_individuals]
+#     population.extend(new_individuals)
     
-    return population
+#     return population
 
 def genetic_algorithm(individual_size, population_size, fitness_function, target_fitness,
                       generations, elite_rate=0.05, mutation_rate=0.25, num_seeds=6):
