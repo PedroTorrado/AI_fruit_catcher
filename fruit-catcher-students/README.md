@@ -74,11 +74,11 @@ The neural network controller implements a feedforward neural network for game c
 ### Network Architecture
 
 ```
-Input Layer (10)     Hidden Layer 1 (8)     Hidden Layer 2 (4)     Output Layer (1)
-    [x]                 [x]                    [x]                    [x]
-    [x]                 [x]                    [x]
-    [x]                 [x]                    [x]
-    [x]                 [x]                    [x]
+Input Layer (10)     Hidden Layer (8)     Output Layer (1)
+    [x]                 [x]                 [x]
+    [x]                 [x]
+    [x]                 [x]
+    [x]                 [x]
     [x]                 [x]
     [x]                 [x]
     [x]                 [x]
@@ -99,16 +99,16 @@ Input Layer (10)     Hidden Layer 1 (8)     Hidden Layer 2 (4)     Output Layer 
    - Raw game state data
    - Normalized to [-1, 1] range
 
-2. **Hidden Layer 1 (8 neurons)**
-   - Sigmoid activation
+2. **Hidden Layer (8 neurons)**
+   - ReLU activation
    - Learns complex patterns in item trajectories
+   - Size calculated using rules of thumb:
+     - Mean of input and output size
+     - 2/3 of input size + output size
+     - Square root of input size times output size
 
-3. **Hidden Layer 2 (4 neurons)**
+3. **Output Layer (1 neuron)**
    - Sigmoid activation
-   - Refines decision making
-
-4. **Output Layer (1 neuron)**
-   - Step function activation
    - Outputs: -1 (move left) or 1 (move right)
 
 ## Genetic Algorithm Implementation (genetic.py)
@@ -117,18 +117,51 @@ The genetic algorithm optimizes the neural network weights through evolutionary 
 
 ### Algorithm Flow
 ```
-Initial Population
+Random Weight Initialization (-1 to 1)
       ↓
-Fitness Evaluation
+Multi-Seed Evaluation (12 seeds per individual)
       ↓
-Selection
+Tournament Selection (8 participants) + Elitism (5% preservation)
       ↓
-Crossover
+Single-Point Crossover (70% probability)
       ↓
-Mutation
+Gaussian Mutation (25% base rate, adaptive)
       ↓
-New Generation
+Population Replacement
 ```
+
+Each step in detail:
+1. **Initial Population**
+   - Random weight generation between -1 and 1
+   - Population size configurable (default: 100)
+   - Weights normalized to prevent extreme values
+
+2. **Fitness Evaluation**
+   - Each individual tested with 12 different random seeds
+   - Average score calculated across all evaluations
+   - Movement penalty applied for low variance
+   - Minimum score capped at 0
+
+3. **Selection**
+   - Tournament Selection: 8 random individuals compete
+   - Elitism: Top 5% of population preserved
+   - Selection pressure balanced for exploration/exploitation
+
+4. **Crossover**
+   - Single-point crossover between parent pairs
+   - 70% probability of crossover occurring
+   - Weight matrices recombined at random point
+
+5. **Mutation**
+   - Base mutation rate: 25%
+   - Gaussian noise addition to weights
+   - Adaptive rate based on stagnation
+   - Weights clamped to [-1, 1] range
+
+6. **New Generation**
+   - Combines elite individuals with offspring
+   - Maintains population size
+   - Preserves best solutions while exploring new ones
 
 ### Key Components
 
@@ -204,6 +237,41 @@ The weight logger helps identify how different parameters affect performance:
 - Number of evaluation seeds
 - Genetic algorithm parameters
 
+## Game Scoring System
+
+The game uses a simple but effective scoring mechanism:
+
+### Score Calculation
+- +1 point for each fruit caught
+- Game ends if:
+  - A bomb is caught
+  - Fruit limit is reached (default: 100 fruits)
+  - All items are cleared after reaching fruit limit
+
+### Fitness Evaluation
+The genetic algorithm evaluates individuals using:
+1. **Multiple Evaluations**
+   - Each individual is tested with multiple random seeds
+   - Default: 12 seeds per evaluation
+   - Provides robust performance assessment
+
+2. **Score Components**
+   - Average score across all evaluations
+   - Movement penalty (-2.0) if score variance < 1.0
+   - Minimum score of 0 (no negative scores)
+
+3. **Evaluation Parameters**
+   - Fruit drop rate: Every 30 frames
+   - Bomb drop rate: Every 100 frames
+   - Maximum fruits: 100 (configurable)
+
+### Weight Logger Analysis
+The weight logger provides detailed performance metrics:
+- Average score across multiple evaluations
+- Minimum and maximum scores
+- Score standard deviation
+- Weight distribution statistics
+
 ## Usage
 
 ### Training Mode
@@ -212,10 +280,10 @@ The weight logger helps identify how different parameters affect performance:
 python main.py -t
 
 # Advanced training with parameters
-python main.py -t -p 100 -g 100 --mutation-rate 0.1 --crossover-rate 0.7
+python main.py -t -p 100 -g 100 -m 0.1 -c 0.7
 
 # Training with weight logging
-python main.py -t --log-weights training_session_1
+python main.py -t -l training_session_1
 ```
 
 ### Play Mode
@@ -224,10 +292,10 @@ python main.py -t --log-weights training_session_1
 python main.py
 
 # AI play with specific weights
-python main.py --weights best_weights.json
+python main.py -w best_individual.txt
 
 # Headless mode (no graphics)
-python main.py --headless
+python main.py -l
 ```
 
 ## Integration with main.py
