@@ -1,5 +1,4 @@
 import numpy as np
-import random
 
 def calculate_hidden_size(input_size, output_size=1):
     """Calculate a good number of hidden neurons using various rules of thumb.

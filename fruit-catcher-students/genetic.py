@@ -1,6 +1,5 @@
 import random
 import numpy as np
-from game import get_score
 
 def create_individual(individual_size):
     """Create a single individual with random weights.
@@ -115,7 +114,7 @@ def inject_new_individuals(population, fitness_scores, individual_size, populati
     return population
 
 def genetic_algorithm(individual_size, population_size, fitness_function, target_fitness,
-                      generations, elite_rate=0.05, mutation_rate=0.25, num_seeds=12):
+                      generations, elite_rate=0.05, mutation_rate=0.25, num_seeds=6):
     """Genetic algorithm with adaptive mutation, elitism, and tournament selection."""
     population = generate_population(individual_size, population_size)
     
