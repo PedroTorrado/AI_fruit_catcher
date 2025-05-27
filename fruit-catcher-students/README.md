@@ -334,13 +334,3 @@ The training data (`train.csv`) follows this structure:
    - Adjustable maximum depth
    - Customizable splitting threshold
 
-## Contributing
-
-Feel free to contribute to this project by:
-1. Forking the repository
-2. Creating a feature branch
-3. Submitting a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
